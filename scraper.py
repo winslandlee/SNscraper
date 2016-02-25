@@ -1,19 +1,30 @@
-from getLinks import getLinks
-from saveImages import saveImage
+import requests
+import Queue
+import getLinks
+import saveImages
+from threading import Thread
+from bs4 import BeautifulSoup
 
-start = True
-while(start):
-    link = raw_input("What link do you want to download images from?\n")
-    #input link needs to have "http://" or it will not work, if statement adds if it does not contain
-    if "http://" not in link:
-        link = "http://" + link
-    url = getLinks(link)
-    saveImage(url)
-    print ("All Images Downloaded")
+queue = Queue.Queue()
 
-    again = raw_input("\nDo you want to download from another link? (y/n)\n")
-    if (again == "y"):
-        start = True
-    elif (again == "n"):
-        raise SystemExit
+url = raw_input("link?\n")
+if 'http://' not in url:
+    url = 'http://' + url
+    
+response = requests.get(url)
+data = response.text
+soup = BeautifulSoup(data, "html.parser")
 
+pages = getLinks.getPages(soup)
+
+saveImages.makeDir()
+
+getLinks.imageParse(url, soup, queue)
+
+for i in range(10):
+    thread = Thread(saveImages.saveImage(queue))
+    thread.start()
+
+queue.join()
+
+print ("All Images Downloaded")
