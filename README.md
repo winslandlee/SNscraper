@@ -1,6 +1,10 @@
 # StanceNationScraper
 
 Created by Winsland Lee
+On the website "http://www.stancenation.com/" they post images from car events and features. They post a lot of images that can be over 200 photos. Instead of manually saving them, I wanted to create a webscraper that would automatically download images based on a given link. 
+
+I primarily use it for links under the "Event Coverage" tab on the main website.
+
 
 Web scraper that searches through source code to search for image links.
 Uses few plugins such as BeautifulSoup4 and Requests to read HTML source code
