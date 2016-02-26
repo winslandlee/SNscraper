@@ -1,11 +1,11 @@
-import requests, os, getpass, urllib
+import os, getpass, urllib
 # from threading import Thread
-from multiprocessing import Process, Queue
+from multiprocessing import Process, JoinableQueue
 #   Process is almost identical to Thread and can be used in it's place.
 #   We can also use the multiprocessing Queue.
-# 
-from bs4 import BeautifulSoup
 
+from bs4 import BeautifulSoup
+import requests
 try:
     input = raw_input
 except NameError:
@@ -44,7 +44,7 @@ def main():
 
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
-        queue = Queue.LifoQueue()
+        queue = JoinableQueue()
         create_folder()
         for image in soup.findAll('meta', {'property': 'og:image'}):
             if '1140' or '1500' in image['content']:
