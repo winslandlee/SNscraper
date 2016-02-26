@@ -1,5 +1,7 @@
 # StanceNationScraper
 
+Created by Winsland Lee
+
 Web scraper that searches through source code to search for image links.
 Uses few plugins such as BeautifulSoup4 and Requests to read HTML source code
 
