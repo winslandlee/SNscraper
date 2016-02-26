@@ -1,5 +1,9 @@
-import requests, Queue, os, getpass, urllib
-from threading import Thread
+import requests, os, getpass, urllib
+# from threading import Thread
+from multiprocessing import Process, Queue
+#   Process is almost identical to Thread and can be used in it's place.
+#   We can also use the multiprocessing Queue.
+# 
 from bs4 import BeautifulSoup
 
 try:
