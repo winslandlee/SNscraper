@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 queue = Queue.Queue()
 
-url = raw_input("link?\n")
+url = raw_input("What is the StanceNation link?\n")
 if 'http://' not in url:
     url = 'http://' + url
     

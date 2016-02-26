@@ -6,7 +6,7 @@ def saveImage(queue):
     i = 1
     size = queue.qsize()
     while not queue.empty():
-        print ("Downloading [" + str(i) + "/" + str(size) + "]" )          
+        print ("Downloading [{}/{}]".format(i, size))          
         image = queue.get()
         urllib.urlretrieve(image, os.path.basename(image))
         i += 1
