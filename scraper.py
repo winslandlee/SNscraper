@@ -43,4 +43,5 @@ while ans == 'y':
         thread_num_1.start()
         thread_num_2.start()
         
-    ans = raw_input("Do you have another link?(y/n)\n")       
+    ans = raw_input("Do you have another link?(y/n)\n") 
+sys.exit()
