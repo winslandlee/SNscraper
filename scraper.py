@@ -26,14 +26,9 @@ def get_links(queue):
     response = requests.get(url)
     soup = BeautifulSoup(response.content, "html.parser")
 
-    count = 0
-
     for image in soup.findAll('meta', {"property": 'og:image'}):
         if '1140' or '1500' in image['content']:
             queue.put(image['content'])
-        count+=1
-        if count > 10:
-            return
 
 
 def save_image(queue):
@@ -48,7 +43,7 @@ def save_image(queue):
         with open(filename, 'wb') as out_file:
             shutil.copyfileobj(response.raw, out_file)
         print("{} Done.".format(filename))
-        print(queue.qsize())
+        print("{} images left".format(queue.qsize()))
         del response
         queue.task_done() ## Need to call this to join it later
         image = queue.get()
@@ -71,10 +66,6 @@ def create_folder():
 def main():
     processes = cpu_count() * 2
     queue = JoinableQueue()
-    ans = 'y'
-
-    # while ans == 'y':
-
     get_links(queue)
     create_folder()
 
@@ -88,8 +79,6 @@ def main():
 
     queue.join()
     queue.close()
-
-        # ans = input("Do you have another link?(y/n)\n")
 
 
 if __name__ == "__main__":
