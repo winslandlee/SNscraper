@@ -1,38 +1,62 @@
 import requests
-import urllib
 import os
+import shutil
+from urllib.parse import urlparse
 from multiprocessing import cpu_count, JoinableQueue, Process
 from bs4 import BeautifulSoup
+# Python2/3 Compatability.
+try:
+    input = raw_input
+except NameError:
+    pass
+
+FOLDER_PATH_FORMAT_STRING = "C:\\Users\\{}\\Pictures\\StanceNation\\{}"
 
 
-FOLDER_PATH_FORMAT_STRING = "C:\Users\\{}\\Pictures\\StanceNation\\{}"
+def get_image_name(url):
+    parsed = urlparse(url)
+    return os.path.split(parsed.path)[1]
 
 
 def get_links(queue):
-    url = raw_input("What is the StanceNation link?\n")
+    url = input("What is the StanceNation link?\n")
     if 'http://' not in url:
         url = 'http://' + url
 
     response = requests.get(url)
     soup = BeautifulSoup(response.content, "html.parser")
 
+    count = 0
+
     for image in soup.findAll('meta', {"property": 'og:image'}):
         if '1140' or '1500' in image['content']:
             queue.put(image['content'])
+        count+=1
+        if count > 10:
+            return
 
 
 def save_image(queue):
-    index = 1
-    size = queue.qsize()
-    while not queue.empty():
-        print ("Downloading [{}/{}]".format(index, size))
+    # index = 1
+    # Individual index for each process? Not that useful.
+    # size = queue.qsize()
+    image = queue.get()  # Blocking
+    while image is not None:
+        # print ("Downloading [{}/{}]".format(index, size))
+        filename = get_image_name(image)
+        response = requests.get(image, stream=True)
+        with open(filename, 'wb') as out_file:
+            shutil.copyfileobj(response.raw, out_file)
+        print("{} Done.".format(filename))
+        print(queue.qsize())
+        del response
+        queue.task_done() ## Need to call this to join it later
         image = queue.get()
-        urllib.urlretrieve(image, os.path.basename(image))
-        index += 1
+    queue.task_done() ## Need to call this to join it later
 
 
 def create_folder():
-    folder_name = raw_input("What do you want to call your folder Name? ")
+    folder_name = input("What do you want to call your folder?")
     # creates folder if it does not exist
     # I'm in linux so I'm ignoreing this bit....
     # but
@@ -49,18 +73,23 @@ def main():
     queue = JoinableQueue()
     ans = 'y'
 
-    while ans == 'y':
+    # while ans == 'y':
 
-        get_links(queue)
-        create_folder()
+    get_links(queue)
+    create_folder()
 
-        for i in range(processes):
-            p = Process(target=save_image, args=(queue,)).start()
+    for i in range(processes):
+        # .start() - Not sure what that actually returns....
+        p = Process(target=save_image, args=(queue,))
+        p.start()
 
-        queue.join()
-        queue.close()
+    for i in range(processes):
+        queue.put(None) ## Tell the processes to end
 
-        ans = raw_input("Do you have another link?(y/n)\n")
+    queue.join()
+    queue.close()
+
+        # ans = input("Do you have another link?(y/n)\n")
 
 
 if __name__ == "__main__":
